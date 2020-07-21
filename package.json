@@ -1,0 +1,32 @@
+{
+  "name": "spotify-lyrical-karaoke",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aults/Spotify-Lyrical-Karaoke.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aults/Spotify-Lyrical-Karaoke/issues"
+  },
+  "engines": {
+    "node": "9.x"
+  },
+  "homepage": "https://github.com/Aults/Spotify-Lyrical-Karaoke#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "genius-lyrics-scrape": "^1.2.0",
+    "phin": "^3.5.0",
+    "querystring": "^0.2.0",
+    "request": "^2.88.2"
+  }
+}
