@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Spotify Lyrical Karaoke</title>
+    <link rel="stylesheet" href="/css/styles.css">
+  <body>
+    <div class="container">
+      <div id="login">
+        <div class="LogIn">
+          <h1 class="Title">Spotify Lyrical Karoake</h1>
+          <a href="/login" class="LogInButton">Log in with your Spotify Account</a>
+        </div>
+      </div>
+      <div id="loggedin">
+        <div id="user-profile">
+        </div>
+        <div id="song">
+        </div>
+        <div id="lyrics-profile">
+        </div>
+        <div id="oauth">
+        </div>
+      </div>
+    </div>
+
+    <script id="user-profile-template" type="text/x-handlebars-template">
+      <div class="LoggedInAs">
+        <h1>Logged in as {{display_name}}</h1>
+      </div>
+      <div class="media">
+        <!--
+        <div class="media-body">
+          <dl class="dl-horizontal">
+            <dt class="songInfo">Display name</dt><dd class="songInfo">{{display_name}}</dd>
+            <dt class="songInfo">Id</dt><dd class="songInfo">{{id}}</dd>
+            <dt class="songInfo">Email</dt><dd class="songInfo">{{email}}</dd>
+            <dt class="songInfo">Spotify URI</dt><dd class="songInfo"><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+            <dt class="songInfo">Link</dt><dd class="songInfo"><a href="{{href}}">{{href}}</a></dd>
+            <dt class="songInfo">Profile Image</dt><dd class="songInfo"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+          </dl>
+        </div>
+        -->
+      </div>
+    </script>
+
+    <script id="song-template" type="text/x-handlebars-template">
+      <div class="CurrentlyPlaying">
+        <h2>Currently Playing</h2>
+      </div>
+      <div class="currSongInfo">
+        <div class="dl-horizontal">
+          <div class="dl-vertical-center">
+            <dd class="track" id="currSong">{{item.name}}</dd>
+          </div>
+          <div class="imgDiv">
+            <img src={{item.album.images.0.url}} style=width:250px;text-align:center;height:250px;border-radius:50%;padding:5px>
+          </div>
+          <div class="dl-vertical-center">
+            <dd class="artist" id="currArtist">{{item.artists.0.name}}</dd>
+          </div>
+          <!--<dt class="songInfo">Playing</dt><dd class="songInfo" id="isPlaying">{{is_playing}}</dd>
+        -->
+        </div>
+        <div class = "timer">
+          <p id="timer" value={{progress_ms}}>{{progress_ms}}</p>
+        </div>
+      </div>
+    </script>
+    
+    <script id="lyrics-template" type="text/x-handlebars-template">
+      <div class="dl-vertical-center">
+        <h1 class="lyrics">Lyrics</h1>
+        <p id="lyricsId" class="currLyrics"></p>
+      </div>
+    </script>
+
+    <script id="oauth-template" type="text/x-handlebars-template">
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+    <script>
+      
+      (function() {
+
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+        var apikey = "" // Spotify api key
+        var refreshCount = 0;
+        var lyrics = ''
+        var currentSong = ''
+        var trackId = ''
+        var timestamp = ''
+        function updateInfo() {
+          var ticker = document.getElementById("timer");  // Cache that (faster)
+
+          function updateP(){
+            refreshCount = refreshCount + 1
+            if(refreshCount / 60 > 49) {
+              refreshCount = 0
+              console.log("We just refreshed the token")
+              $.ajax({
+                url: '/refresh_token',
+                data: {
+                  'refresh_token': refresh_token
+                }
+                }).done(function(data) {
+                  access_token = data.access_token;
+                  oauthPlaceholder.innerHTML = oauthTemplate({
+                    access_token: access_token,
+                    refresh_token: refresh_token
+                  });
+              });
+            }
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me/player/currently-playing',
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                  userSongPlaceholder.innerHTML = userSongTemplate(response);
+                  lyrics = document.getElementById("lyricsId").innerHTML
+                  var currPlaying = !(timestamp == document.getElementById("timer").innerHTML)
+                  timestamp = document.getElementById("timer").innerHTML
+                  if(currPlaying) {
+                    if(lyrics == "") {
+                      var trackName = document.getElementById("currSong").innerHTML
+                      var artist = document.getElementById("currArtist").innerHTML
+                      $.ajax({
+                        url: '/findLyrics',
+                        data: {
+                          'name': trackName,
+                          'artist': artist
+                        }
+                      }).done(function(data) {
+                        lyrics = data.lyrics
+                        console.log(lyrics)
+                        document.getElementById("lyricsId").innerHTML = lyrics
+                      });
+                      lyrics = document.getElementById("lyricsId").innerHTML
+                      console.log("****" + lyrics.substring(0,30))
+                    }
+                  }
+                  var currEntry = document.getElementById("timer").innerHTML
+                  var seconds = Math.floor((currEntry * .001 % 60))
+                  var minute = Math.floor((currEntry * .001 / 60))
+                  if(minute == 0) {
+                    document.getElementById("timer").innerHTML = seconds + " seconds"
+                  } else {
+                    document.getElementById("timer").innerHTML = minute + " minutes " + seconds + " seconds"
+                  }
+
+
+                  if(currentSong != document.getElementById("currSong").innerHTML) {
+                    // We must find new lyrics
+                    var trackName = document.getElementById("currSong").innerHTML
+                    var artist = document.getElementById("currArtist").innerHTML
+                    
+                    $.ajax({
+                      url: '/findLyrics',
+                      data: {
+                        'name': trackName,
+                        'artist': artist
+                      }
+                    }).done(function(data) {
+                      lyrics = data.lyrics
+                      document.getElementById("lyricsId").innerHTML = lyrics
+                    });
+                    currentSong = trackName
+                    lyrics = document.getElementById("lyricsId").innerHTML 
+                  }
+                }
+            });
+          }
+
+          updateP(); // Update once immediately...
+          setInterval(updateP, 1000) // ...and then again every 3000ms
+        }
+        var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+            userProfileTemplate = Handlebars.compile(userProfileSource),
+            userProfilePlaceholder = document.getElementById('user-profile');
+            
+        var lyricsSource = document.getElementById('lyrics-template').innerHTML,
+            lyricsTemplate = Handlebars.compile(lyricsSource),
+            lyricsPlaceholder = document.getElementById('lyrics-profile');
+
+        var userSongSource = document.getElementById('song-template').innerHTML,
+            userSongTemplate = Handlebars.compile(userSongSource),
+            userSongPlaceholder = document.getElementById('song');
+            
+        var oauthSource = document.getElementById('oauth-template').innerHTML,
+            oauthTemplate = Handlebars.compile(oauthSource),
+            oauthPlaceholder = document.getElementById('oauth');
+
+        var params = getHashParams();
+
+        var access_token = params.access_token,
+            refresh_token = params.refresh_token,
+            error = params.error;
+        console.log('Access key: ' + access_token)
+        if (error) {
+          alert('There was an error during the authentication');
+        } else {
+          if (access_token) {
+            // render oauth info
+            oauthPlaceholder.innerHTML = oauthTemplate({
+              access_token: access_token,
+              refresh_token: refresh_token
+            });
+            
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me',
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                  userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+                  lyricsPlaceholder.innerHTML = lyricsTemplate(response);
+                  $('#login').hide();
+                  $('#loggedin').show();
+                }
+            });
+            updateInfo();
+            
+          } else {
+              // render initial screen
+              $('#login').show();
+              $('#loggedin').hide();
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,137 @@
+body {
+    background-image: url(/img/bg1.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+p {
+    color: white;
+}
+.clearfix {
+    color: white;
+}
+.songInfo {
+    color: white;
+    white-space: pre-line;
+}
+.LogIn {    
+    text-align: center;
+    padding-top: 15%;
+}
+.Title {
+    font-size: 70px;
+    color: white;
+    font-family: proxima nova, Charcoal, sans-serif;
+}
+.text-lyrics {
+    white-space: pre-line;
+}
+a.LogInButton{
+    display:inline-block;
+    padding:0.46em 1.6em;
+    border:0.1em solid #000000;
+    margin:0 0.2em 0.2em 0;
+    border-radius: 30px;
+    box-sizing: border-box;
+    text-decoration:none;
+    font-family:'Roboto',sans-serif;
+    font-weight:300;
+    font-size: 35px;
+    color:#000000;
+    text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
+    background-color:lightgrey;
+    text-align:center;
+    transition: all 0.15s;
+}
+a.LogInButton:hover{
+    text-shadow: 0 0 5em rgba(255,255,255,1);
+    color:#005255;
+    border-color:#005255;
+}
+@media all and (max-width:30em){
+    a.LogInButton{
+        display:block;
+        margin:0.4em auto;
+    }
+}
+.LoggedInAs{
+    color: white;
+    font-size: 7px;
+    font-family: proxima nova;
+}
+
+.CurrentlyPlaying{
+    color: white;
+    font-size: 40px;
+    font-family: proxima nova;
+    text-align: center;
+}
+
+.track{
+    color: white;
+    font-size: 30px;
+    width: 300px;
+    text-align: center;
+    font-family: proxima nova;
+      /* to the left of the image circle shit */
+}
+.imgDiv {
+    width: 250px;
+    text-align: center
+}
+.artist{
+    color: white;
+    font-size: 30px;
+    width: 300px;
+    text-align: center;
+    font-family: proxima nova;
+    /* to the right of the image circle shit */
+}
+
+.time{
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    font-family: proxima nova;
+}
+.timer{
+    color: white;
+    text-align: center;
+    font-size: 15px;
+    font-family: proxima nova;
+}
+
+.lyrics {
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    white-space: pre-line;
+    font-family: proxima nova;
+}
+.currLyrics{
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    white-space: pre-line;
+    font-family: proxima nova;
+    overflow-y: scroll;
+    height: 360px;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.dl-horizontal {
+    display: flex;
+    justify-content: center;
+}
+.dl-vertical-center {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.dl-horizontal-center {
+    display:flex;
+    justify-content: center;
+}
+.currLyrics::-webkit-scrollbar {
+    display: none;
+    /* get rid of the scroll bar */
+}
